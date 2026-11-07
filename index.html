@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sana Özel Bir Hediye</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: #0a0a0a;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        /* %100 CSS İLE ÜRETİLMİŞ ÇİÇEK/BUKET ALANI */
+        #flower-container {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            transform: translateY(100vh) scale(0.5); /* Ekranın altından başlayacak */
+            transition: transform 2s ease-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Çiçek ekrana geldiğinde */
+        #flower-container.rise {
+            transform: translateY(0) scale(1);
+        }
+
+        /* CSS YAPRAKLAR (Petals) */
+        .petal {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
+            border-radius: 50% 0 50% 50%; /* Çiçek yaprağı formu */
+            transform-origin: 100% 100%; /* Çiçeğin merkezi */
+            right: 50%;
+            bottom: 50%;
+            transform: rotate(var(--r));
+            transition: transform 2.5s ease-in-out, box-shadow 2s;
+            z-index: 5;
+            box-shadow: -2px -2px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Çiçek açıldığında yapraklar dışa doğru genişler ve çerçeve olur */
+        #flower-container.bloom .petal {
+            transform: rotate(var(--r)) translateY(-140px) scale(1.15);
+            box-shadow: -5px -5px 20px rgba(255, 8, 68, 0.4);
+        }
+
+        /* FOTOĞRAFLARIN DÖNECEĞİ MERKEZ ÇERÇEVE */
+        #photo-frame {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0); /* Başlangıçta çiçeğin içinde gizli */
+            overflow: hidden;
+            z-index: 10;
+            box-shadow: 0 0 30px rgba(255, 8, 68, 0.6);
+            transition: transform 2.5s ease-in-out;
+            border: 5px solid #ffb199;
+            background-color: #000;
+        }
+
+        /* Çiçek açılınca fotoğraflar ortaya çıkar */
+        #flower-container.bloom #photo-frame {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* SLIDER GÖRSELLERİ */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transform: scale(1);
+            transition: opacity 2s ease-in-out, transform 8s linear;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1.15); /* Fotoğraflar dönerken yavaşça yakınlaşır */
+        }
+
+        /* HEDİYEYİ AÇ BUTONU */
+        #open-btn {
+            position: absolute;
+            z-index: 20;
+            padding: 15px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(45deg, #ff4b6b, #ff768b);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 1s ease;
+            box-shadow: 0 0 20px rgba(255, 75, 107, 0.6);
+            pointer-events: none;
+        }
+
+        #open-btn.show {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        #open-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 75, 107, 0.9);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Müzik -->
+    <audio id="bg-music" src="sarki2.mp3" loop></audio>
+
+    <!-- Hediye Butonu -->
+    <button id="open-btn">Hediyeyi Aç</button>
+
+    <!-- Tamamen CSS ile Kodlanmış Çiçek ve Fotoğraf Çerçevesi -->
+    <div id="flower-container">
+        <!-- 12 Adet CSS Yaprağı -->
+        <div class="petal" style="--r: 0deg;"></div>
+        <div class="petal" style="--r: 30deg;"></div>
+        <div class="petal" style="--r: 60deg;"></div>
+        <div class="petal" style="--r: 90deg;"></div>
+        <div class="petal" style="--r: 120deg;"></div>
+        <div class="petal" style="--r: 150deg;"></div>
+        <div class="petal" style="--r: 180deg;"></div>
+        <div class="petal" style="--r: 210deg;"></div>
+        <div class="petal" style="--r: 240deg;"></div>
+        <div class="petal" style="--r: 270deg;"></div>
+        <div class="petal" style="--r: 300deg;"></div>
+        <div class="petal" style="--r: 330deg;"></div>
+
+        <!-- Merkeze Yerleşen Fotoğraf Çerçevesi -->
+        <div id="photo-frame">
+            <!-- JS ile 17 resim buraya yüklenecek -->
+        </div>
+    </div>
+
+    <script>
+        // Senin gönderdiğin toplam 17 görsel
+        const images = [
+            "IMG-20261012-WA0032.jpg",
+            "IMG-20261106-WA0014.jpg",
+            "IMG-20261022-WA0017.jpg",
+            "IMG-20261020-WA0014.jpg",
+            "IMG-20261028-WA0055.jpg",
+            "IMG-20261016-WA0012.jpg",
+            "IMG-20261009-WA0068.jpg",
+            "resim8.jpg",  // Klasördeki geri kalan resimlerin adını 
+            "resim9.jpg",  // resim8.jpg, resim9.jpg şeklinde yapabilir 
+            "resim10.jpg", // veya bu isimleri orjinal isimlerle değiştirebilirsin
+            "resim11.jpg",
+            "resim12.jpg",
+            "resim13.jpg",
+            "resim14.jpg",
+            "resim15.jpg",
+            "resim16.jpg",
+            "resim17.jpg"
+        ];
+
+        let currentSlide = 0;
+        const flowerContainer = document.getElementById('flower-container');
+        const openBtn = document.getElementById('open-btn');
+        const photoFrame = document.getElementById('photo-frame');
+        const bgMusic = document.getElementById('bg-music');
+
+        // Sayfa yüklendiğinde
+        window.onload = () => {
+            // 1. Çiçek aşağıdan yukarı çıksın
+            setTimeout(() => {
+                flowerContainer.classList.add('rise');
+            }, 500);
+
+            // 2. Çiçek yerini aldıktan sonra Buton ortaya çıksın
+            setTimeout(() => {
+                openBtn.classList.add('show');
+            }, 2500); 
+        };
+
+        // 17 resmi döngü için HTML'e ekle
+        images.forEach((imgSrc, index) => {
+            let imgElement = document.createElement('img');
+            imgElement.src = imgSrc;
+            imgElement.classList.add('slide');
+            if(index === 0) imgElement.classList.add('active'); // İlk resmi göster
+            photoFrame.appendChild(imgElement);
+        });
+
+        // Butona tıklandığında Çiçek Açılsın ve Müzik Başlasın
+        openBtn.addEventListener('click', () => {
+            bgMusic.play();
+            openBtn.classList.remove('show');
+            openBtn.style.display = 'none';
+
+            // Çiçek yapraklarını dışa doğru açıp fotoğrafları gösterir
+            flowerContainer.classList.add('bloom');
+
+            // Geçişleri başlat (Her 4 saniyede 1 resim değişir)
+            setInterval(changeSlide, 4000);
+        });
+
+        // 17 resimlik Slider geçiş fonksiyonu
+        function changeSlide() {
+            const slides = document.querySelectorAll('.slide');
+            slides[currentSlide].classList.remove('active');
+            
+            currentSlide = (currentSlide + 1) % slides.length;
+            
+            slides[currentSlide].classList.add('active');
+        }
+    </script>
+</body>
+</html>
